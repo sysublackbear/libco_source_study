@@ -1,7 +1,7 @@
-#libco(11)
+# libco(11)
 @(源码)
 
-##8.example_setenv.cpp
+## 8.example_setenv.cpp
 
 源码篇幅有点小，代码如下：
 ```cpp
@@ -31,7 +31,7 @@ int main(int argc, char* argv[])
 }
 ```
 
-###8.1.co_set_env_list函数
+### 8.1.co_set_env_list函数
 位于`co_hook_sys_call.cpp`，代码如下：
 ```cpp
 static stCoSysEnvArr_t g_co_sysenv = { 0 };
@@ -78,7 +78,7 @@ void co_set_env_list( const char *name[],size_t cnt)
 }
 ```
 
-####8.1.1.stCoSysEnvArr_t数据结构
+#### 8.1.1.stCoSysEnvArr_t数据结构
 位于`co_hook_sys_call.cpp`，代码如下：
 ```cpp
 struct stCoSysEnv_t
@@ -93,7 +93,7 @@ struct stCoSysEnvArr_t
 };
 ```
 
-###8.2.RoutineFunc函数
+### 8.2.RoutineFunc函数
 位于`example_setenv.cpp`，代码如下：
 ```cpp
 // co_create(&co, NULL, RoutineFunc, &args[i]);
@@ -108,7 +108,7 @@ void* RoutineFunc(void* args)
 }
 ```
 
-####8.2.1.SetAndGetEnv函数
+#### 8.2.1.SetAndGetEnv函数
 位于`example_setenv.cpp`，代码如下：
 ```cpp
 void SetAndGetEnv(int iRoutineID)
@@ -145,7 +145,7 @@ void SetAndGetEnv(int iRoutineID)
 }
 ```
 
-#####8.2.1.1.setenv函数
+##### 8.2.1.1.setenv函数
 位于`co_hook_sys_call.cpp`，代码如下：
 ```cpp
 // int ret = setenv("CGINAME", sBuf, 1);
@@ -209,7 +209,7 @@ static int co_sysenv_comp(const void *a, const void *b)
 }
 ```
 
-#####8.2.1.2.getenv函数
+##### 8.2.1.2.getenv函数
 位于`co_hook_sys_call.cpp`，代码如下：
 ```cpp
 char *getenv( const char *n )
@@ -242,9 +242,9 @@ char *getenv( const char *n )
 }
 ```
 
-###8.3.综述
+### 8.3.综述
 该程序主要介绍了如何使用协程变量，或者协程的环境变量的读写（对`setenv`和`getenv`的hook）。输出结果：
 
-![Alt text](./1531073673375.png)
+![11-1.png](https://github.com/sysublackbear/libco_source_study/blob/master/libco_pic/11-1.png)
 
 如图所示，主协程在调度完三个协程之后，一直在event
