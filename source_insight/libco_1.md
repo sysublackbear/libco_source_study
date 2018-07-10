@@ -18,7 +18,7 @@
 
 决定先从几个example的源码开始看。后面有可能会穿插介绍libco里面，协程是怎么实现的。
 
-##1.example_thread.cpp
+## 1.example_thread.cpp
 main函数非常简单，创建若干个线程，每个线程的入口运行函数为`routine_func`。
 ```cpp
 int main(int argc,char *argv[])
@@ -52,7 +52,7 @@ static void *routine_func( void * )
 }
 ```
 
-###1.1.co_get_epoll_ct()函数
+### 1.1.co_get_epoll_ct()函数
 其中，ct = current thread。这个函数也有简单，但是需要理解清楚其中的函数怎么实现的。
 看函数的含义，像是为每一个线程获取对应的epoll事件。
 ```cpp
@@ -66,7 +66,7 @@ stCoEpoll_t *co_get_epoll_ct()
 } 
 ```
 
-####1.1.1.stCoEpoll_t 事件驱动的数据结构
+#### 1.1.1.stCoEpoll_t 事件驱动的数据结构
 数据结构如下：
 ```cpp
 struct stCoEpoll_t
@@ -83,7 +83,7 @@ struct stCoEpoll_t
 什么是fd？
 > fd 是(file descriptor)，这种一般是BSD Socket的用法，用在Unix/Linux系统上。在Unix/Linux系统下，一个socket句柄，可以看做是一个文件，在socket上收发数据，相当于对一个文件进行读写，所以一个socket句柄，通常也用表示文件句柄的fd来表示。
 
-####1.1.2.stTimeout_t 时间轮的数据结构
+#### 1.1.2.stTimeout_t 时间轮的数据结构
 时间轮盘的数据结构如下：
 ```cpp
 struct stTimeout_t
@@ -124,7 +124,7 @@ typedef void (*OnPreparePfn_t)( stTimeoutItem_t *,struct epoll_event &ev, stTime
 typedef void (*OnProcessPfn_t)( stTimeoutItem_t *);
 ```
 
-###1.2.co_get_curr_thread_env()函数
+### 1.2.co_get_curr_thread_env()函数
 这个函数的实现逻辑也很简单：
 ```cpp
 stCoRoutineEnv_t *co_get_curr_thread_env()
@@ -135,7 +135,7 @@ static stCoRoutineEnv_t* g_arrCoEnvPerThread[ 204800 ] = { 0 };
 ```
 g_arrCoEnvPerThread：全局的，记录每个线程含有的所有协程环境的数组空间，一个线程可以开204800个协程环境，每个线程通过自身的tid作为下标在进程空间的数组访问。
 
-####1.2.1.GetPid()
+#### 1.2.1.GetPid()
 不同linux的系统函数`getpid()`，这里考虑跨平台因素重新实现了`GetPid()`：
 ```cpp
 static pid_t GetPid()
@@ -171,7 +171,7 @@ static pid_t GetPid()
 >  __thread是GCC内置的线程局部存储设施，存取效率可以和全局变量相比。
 >  __thread变量每一个线程有一份独立实体，各个线程的值互不干扰。可以用来修饰那些带有全局性且值可能变，但是又不值得用全局变量保护的变量。
 
-####1.2.2.stCoRoutineEnv_t 数据结构
+#### 1.2.2.stCoRoutineEnv_t 数据结构
 在协程被创建前，需要有个某进程/线程下的协程环境结构体变量。这个变量用于管理当前进程/线程下的协程。
 ```cpp
 struct stCoRoutineEnv_t
@@ -187,7 +187,7 @@ struct stCoRoutineEnv_t
 ```
 其中,`stCoEpoll_t`的具体数据结构在上面1.1.1有所介绍。
 
-####1.2.3.stCoRoutine_t——协程的数据结构
+#### 1.2.3.stCoRoutine_t——协程的数据结构
 位于co_routine_inner.h中。数据结构如下：
 ```cpp
 struct stCoRoutine_t
@@ -221,7 +221,7 @@ struct stCoRoutine_t
 ```
 
 
-####1.2.4.coctx_t的数据结构
+#### 1.2.4.coctx_t的数据结构
 位于`coctx.h`中。协程上下文结构，用于保存协程栈的地址和切换时保存寄存器的值。
 ```cpp
 struct coctx_t      
@@ -239,7 +239,7 @@ struct coctx_t
 };                  
 ```
 
-####1.2.5.stStackMem_t的数据结构
+#### 1.2.5.stStackMem_t的数据结构
 协程栈的数据结构位于`co_routine_inner.h`，如下：
 ```cpp
 struct stStackMem_t
@@ -264,7 +264,7 @@ struct stCoSpec_t
 目前还不太清楚这个结构时用来干嘛的，TODO：待补充。
 
 
-###1.3.co_init_curr_thread_env()函数
+### 1.3.co_init_curr_thread_env()函数
 初始化所在线程对应的协程环境函数。代码如下：
 ```cpp
 void co_init_curr_thread_env()
@@ -289,7 +289,7 @@ void co_init_curr_thread_env()
 }
 ```
 
-####1.3.1.co_create_env()创造协程的函数
+#### 1.3.1.co_create_env()创造协程的函数
 创造协程的函数，代码如下：
 ```cpp
 // 将协程（入口函数为pfn的协程注册到）
@@ -360,7 +360,7 @@ struct stCoRoutine_t *co_create_env(
 }
 ```
 
-#####1.3.1.1.stCoRoutineAttr_t数据结构
+##### 1.3.1.1.stCoRoutineAttr_t数据结构
 位于`co_routine.h`，如下：
 ```cpp
 struct stCoRoutineAttr_t
@@ -395,7 +395,7 @@ static stStackMem_t* co_get_stackmem(
 ```
 从共享栈中分配一个空间
 
-#####1.3.1.3.co_alloc_stackmem函数
+##### 1.3.1.3.co_alloc_stackmem函数
 位于`co_routine.cpp`中，如下：
 ```cpp
 /////////////////for copy stack //////////////////////////
@@ -429,7 +429,7 @@ struct stShareStack_t
 };
 ```
 
-####1.3.2.coctx_init函数
+#### 1.3.2.coctx_init函数
 位于`coctx.cpp`中，初始化协程上下文环境。如下：
 ```cpp
 int coctx_init( coctx_t *ctx )
@@ -440,7 +440,7 @@ int coctx_init( coctx_t *ctx )
 ```
 也很简单，清0初始化。
 
-####1.3.3.AllocEpoll函数
+#### 1.3.3.AllocEpoll函数
 位于`co_routine.cpp`，如下：
 ```cpp
 stCoEpoll_t *AllocEpoll()
@@ -457,7 +457,7 @@ stCoEpoll_t *AllocEpoll()
 ```
 也是分配空间的操作。
 
-#####1.3.3.1.co_epoll_create函数
+##### 1.3.3.1.co_epoll_create函数
 位于`co_epoll.cpp`中，代码如下：
 ```cpp
 int co_epoll_create( int size )
@@ -471,7 +471,7 @@ int co_epoll_create( int size )
 
 这里`stCoEpoll_t::_EPOLL_SIZE`为1024 * 10
 
-####1.3.4.SetEpoll函数
+#### 1.3.4.SetEpoll函数
 位于`co_routine.cpp`，逻辑也很简单：
 ```cpp
 void SetEpoll( stCoRoutineEnv_t *env,stCoEpoll_t *ev )
@@ -481,7 +481,7 @@ void SetEpoll( stCoRoutineEnv_t *env,stCoEpoll_t *ev )
 ```
 把初始化的epoll事件注册到对应的协程环境中。
 
-###1.4.co_eventloop函数
+### 1.4.co_eventloop函数
 驱动事件循环的函数。调用的地方：
 ```cpp
 int loop(void *)
@@ -600,7 +600,7 @@ void co_eventloop(
 }
 ```
 
-####1.4.1.co_epoll_res数据结构
+#### 1.4.1.co_epoll_res数据结构
 位于`co_epoll.h`中，如下：
 ```cpp
 struct co_epoll_res
