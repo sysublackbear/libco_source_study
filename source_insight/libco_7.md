@@ -1,7 +1,7 @@
-#libco(7)
+# libco(7)
 @(源码)
 
-##4.example_copystack.cpp
+## 4.example_copystack.cpp
 
 先看一下这个例子的`main`函数：
 ```cpp
@@ -29,7 +29,7 @@ int main()
 }
 ```
 
-###4.1.共享栈的数据结构
+### 4.1.共享栈的数据结构
 位于`co_routine_inner.h`，代码如下：
 ```cpp
 struct stStackMem_t
@@ -50,7 +50,7 @@ struct stShareStack_t
 };
 ```
 
-###4.2.co_alloc_sharestack函数
+### 4.2.co_alloc_sharestack函数
 分配共享栈的函数，位于`co_routine.cpp`，代码如下：
 ```cpp
 // stShareStack_t* share_stack= co_alloc_sharestack(1, 1024 * 128);
@@ -84,7 +84,7 @@ stStackMem_t* co_alloc_stackmem(unsigned int stack_size)
 ```
 
 
-###4.3.RoutineFunc函数
+### 4.3.RoutineFunc函数
 位于`example_copystack.cpp`，代码如下：
 ```cpp
 void* RoutineFunc(void* args)
@@ -105,9 +105,9 @@ void* RoutineFunc(void* args)
 }
 ```
 
-###4.4.综述
+### 4.4.综述
 这里例子比较简单，纯粹是为了说明，在共享栈模式下，多个协程共享同一份内存空间。这个demo输出的如下：
-![Alt text](./1530428558355.png)
+![7-1.png](https://github.com/sysublackbear/libco_source_study/blob/master/libco_pic/7-1.png)
 我们可以看到多个协程初始化数组的地址空间是一样的。
 
 至于有人会问，为什么会在循环里面，每次定义的数组的地址空间能够保持一致。这里涉及编译器的优化问题，编译器不会因为循环而反复分配变量，数组的空间会一直保持。
