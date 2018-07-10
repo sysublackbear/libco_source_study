@@ -1,12 +1,12 @@
-#libco(5)
+# libco(5)
 
 @(源码)
 
-#####3.5.7.协程切换的流程图
+##### 3.5.7.协程切换的流程图
 如图所示：
 ![Alt text](./1529139557214.png)
 
-###3.6.Consumer函数
+### 3.6.Consumer函数
 位于`example_cond.cpp`，代码如下：
 ```cpp
 // args = env;
@@ -35,7 +35,7 @@ void* Consumer(void* args)
 }
 ```
 
-####3.6.1.co_enable_hook_sys函数
+#### 3.6.1.co_enable_hook_sys函数
 位于`co_hook_sys_call.cpp`，代码如下：
 ```cpp
 // 打开系统的hook开关
@@ -50,7 +50,7 @@ void co_enable_hook_sys()
 }
 ```
 
-#####3.6.1.1.GetCurrThreadCo函数
+##### 3.6.1.1.GetCurrThreadCo函数
 位于`co_routine.cpp`，代码如下：
 ```cpp
 // 获取当前线程的协程环境的调用栈栈顶协程。
@@ -66,7 +66,7 @@ stCoRoutine_t *GetCurrThreadCo( )
 }
 ```
 
-####3.6.2.co_cond_timedwait函数
+#### 3.6.2.co_cond_timedwait函数
 位于`co_routine.cpp`，代码如下：
 ```cpp
 // co_cond_timedwait(env->cond, -1);
@@ -109,7 +109,7 @@ int co_cond_timedwait( stCoCond_t *link,int ms )
 }
 ```
 
-#####3.6.2.1.co_yield_ct函数
+##### 3.6.2.1.co_yield_ct函数
 位于`co_routine.cpp`，代码如下：
 ```cpp
 void co_yield_env( stCoRoutineEnv_t *env )
@@ -131,7 +131,7 @@ void co_yield_ct()
 }
 ```
 
-#####3.6.2.2.OnSignalProcessEvent函数
+##### 3.6.2.2.OnSignalProcessEvent函数
 位于`co_routine.cpp`，代码如下：
 ```cpp
 // cosumer协程的回调函数
@@ -142,7 +142,7 @@ static void OnSignalProcessEvent( stTimeoutItem_t * ap )
 }
 ```
 
-###3.7.Producer函数
+### 3.7.Producer函数
 位于`example_cond.cpp`，代码如下：
 ```cpp
 // co_create(&producer_routine, NULL, Producer, env);
@@ -173,7 +173,7 @@ void* Producer(void* args)
 3. pause()挂起进程。
 由此可见，sleep会挂起当前进程，如果调用，所有的其他协程将被挂起，无法进行正常的协程调度。
 
-####3.7.1.co_cond_signal函数
+#### 3.7.1.co_cond_signal函数
 位于`co_routine.cpp`，代码如下：
 ```cpp
 int co_cond_signal( stCoCond_t *si )
@@ -194,7 +194,7 @@ int co_cond_signal( stCoCond_t *si )
 }
 ```
 
-#####3.7.1.1.co_cond_pop函数
+##### 3.7.1.1.co_cond_pop函数
 位于`co_routine.cpp`，代码如下：
 ```cpp
 // stCoCondItem_t * sp = co_cond_pop( si );
@@ -209,7 +209,7 @@ stCoCondItem_t *co_cond_pop( stCoCond_t *link )
 }
 ```
 
-####3.7.2.poll函数
+#### 3.7.2.poll函数
 位于`co_hook_sys_call.cpp`，代码如下：
 ```cpp
 // poll(NULL, 0, 1000);
@@ -230,7 +230,7 @@ int poll(struct pollfd fds[], nfds_t nfds, int timeout)
 ```
 **注意**：之所以要hook，是因为系统调用级别的poll函数会阻塞整个线程，而我们需要达到的效果是只阻塞当前协程，
 
-####3.7.3.HOOK_SYS_FUNC函数
+#### 3.7.3.HOOK_SYS_FUNC函数
 位于`co_hook_sys_call.cpp`，代码如下：
 ```cpp
 #define HOOK_SYS_FUNC(name) if( !g_sys_##name##_func ) { g_sys_##name##_func = (name##_pfn_t)dlsym(RTLD_NEXT,#name); }
@@ -253,7 +253,7 @@ typedef int (*poll_pfn_t)(struct pollfd fds[], nfds_t nfds, int timeout);
 
 `RTLD_NEXT`允许从调用方链接映射列表中的下一个关联目标文件获取符号。即动态链接时**跳过**当前库文件的`poll`函数。如3.7.2。
 
-####3.7.4.co_is_enable_sys_hook函数
+#### 3.7.4.co_is_enable_sys_hook函数
 位于`co_routine.cpp`，代码如下：
 ```cpp
 bool co_is_enable_sys_hook()
@@ -265,7 +265,7 @@ bool co_is_enable_sys_hook()
 }
 ```
 
-####3.7.5.co_poll_inner函数
+#### 3.7.5.co_poll_inner函数
 位于`co_routine.cpp`，代码如下：
 hook后重新实现的`poll`函数。
 ```cpp
