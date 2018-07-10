@@ -1,10 +1,10 @@
-#libco(2)
+# libco(2)
 
 @(源码)源码
 
 待续libco(1)。
 
-#####1.4.1.1.epoll_event数据结构
+##### 1.4.1.1.epoll_event数据结构
 位于`co_epoll.h`。目前还不清楚这个数据是用来干嘛的。
 ```cpp
 struct epoll_event
@@ -33,7 +33,7 @@ typedef union epoll_data
 + EPOLLET：边沿触发，epoll监听的fd默认是电平触发。
 + EPOLLONESHOT：对应fd的事件被触发通知后，需要重新调用epoll_ctl对其进行修改(EPOLL_CTL_MOD)，才能恢复事件触发通知
 
-#####1.4.1.2.kevent数据结构
+##### 1.4.1.2.kevent数据结构
 `kevent`是linux系统API定义的一个数据结构，背景如下：
 > poll和select已经是相当不错的复用文件描述符的方法了。但为了使用这两个函数，你需要创建一个描述符的链表，然后把它们发送给内核，在返回的时候又要再次查看这个链表。这看上去有点效率低下。一个更好一些的模型是把描述符链表交给内核，然后就等待。一旦有某个或多个事件发生，内核就把一个只包含有发生了事件的描述符的链表通知给进程，由此避免了每次函数返回的时候都要去遍历整个链表。尽管对于只打开了几个描述符的进程而言这点改进算不得什么，但对于那些打开了几千个文件描述符的程序来说，这种性能改进就相当显著了。这就是kqueue诞生背后的主要目的。同时，设计者还希望进程能够检测更多类型的事件，比如文件修改、文件删除、信号交付或者子进程退出，并提供一个包含了其它任务的灵活的函数调用。处理信号、复用文件描述符、以及等待子进程等操作都可以封装到这个单一的kqueue接口中，因为它们都是在等待某个事件的发生。
 > kevent结构体用于和kqueue的通信。FreeBSD上的头文件位于/usr/include/sys/event.h。在这个文件中有对kevent结构体的声明，以及其它的一些选项和标志。和select和poll比起来，kqueue还相当的年轻，所以它一直都在发展和添加新的特性。请查看你的系统头文件以确定任何新的或者特定于系统的选项。
@@ -50,7 +50,7 @@ struct kevent {
 };
 ```
 
-####1.4.2.co_epoll_res_alloc函数
+#### 1.4.2.co_epoll_res_alloc函数
 位于`co_epoll.cpp`，代码如下：
 ```cpp
 // ctx->result =  co_epoll_res_alloc( stCoEpoll_t::_EPOLL_SIZE );
@@ -69,7 +69,7 @@ struct co_epoll_res *co_epoll_res_alloc( int n )
 }
 ```
 
-####1.4.3.co_epoll_wait函数
+#### 1.4.3.co_epoll_wait函数
 位于`co_epoll.cpp`中，代码也很简单：
 ```cpp
 int	co_epoll_wait(
@@ -87,7 +87,7 @@ int	co_epoll_wait(
 > 该函数返回需要处理的事件数目，如返回0表示已超时。
 > 返回的事件集合在events数组中，数组中实际存放的成员个数是函数的返回值。返回0表示已经超时。
 
-####1.4.4.AddTail函数
+#### 1.4.4.AddTail函数
 位于`co_routine.cpp`中，代码如下：
 ```cpp
 // 就绪函数为空,追加
@@ -127,7 +127,7 @@ void inline AddTail(TLink*apLink,TNode *ap)
 }
 ```
 
-####1.4.5.GetTickMS函数
+#### 1.4.5.GetTickMS函数
 获取当前时间，精确到毫秒级别，位于`co_routine.cpp`，如下：
 ```cpp
 #if defined( __LIBCO_RDTSCP__) 
@@ -187,7 +187,7 @@ static unsigned long long GetTickMS()
 ```
 这里取出cpu当前主频。用计数去除以主频得到毫秒级的时间。这个时间不是当前的时间，因为我们在计算轮盘超时元素的时候只要算两个值之间的时间差。这里的getCpuKhz是从/proc/cpuinfo 取到的值。
 
-####1.4.5.TakeAllTimeout函数
+#### 1.4.5.TakeAllTimeout函数
 位于`co_routine.cpp`中，代码如下：
 ```cpp
 inline void TakeAllTimeout( 
@@ -231,7 +231,7 @@ inline void TakeAllTimeout(
 }
 ```
 
-#####1.4.5.1.Join函数
+##### 1.4.5.1.Join函数
 位于`co_routine.cpp`中，代码如下：
 ```cpp
 template <class TNode,class TLink>
@@ -271,7 +271,7 @@ void inline Join( TLink*apLink,TLink *apOther )
 }
 ```
 
-####1.4.6.PopHead函数
+#### 1.4.6.PopHead函数
 位于`co_routine.cpp`，代码如下：
 ```cpp
 template <class TNode,class TLink>
@@ -304,7 +304,7 @@ void inline PopHead( TLink*apLink )
 }
 ```
 
-####1.4.7.AddTimeout函数
+#### 1.4.7.AddTimeout函数
 位于`co_routine.cpp`，代码如下：
 ```cpp
 // AddTimeout(ctx->pTimeout, lp, now);
@@ -354,7 +354,7 @@ int AddTimeout(
 }
 ```
 
-###1.5.co_eventloop函数综述
+### 1.5.co_eventloop函数综述
 这里函数主要用到了libco实现了时间轮盘的特点。轮盘上把一些网络io的事件挂上去。当发生对应网络事件的时候，切换到对应协程。或是当网络io事件超时的时候也切换到协程。事件的结构体有变量标记当前这个事件是超时了还是被触发了。TODO：后面这里会补上数据结构图。
 
 `co_eventloop`函数的步骤如下:
@@ -372,9 +372,9 @@ int AddTimeout(
 12. 执行每个事件的回调函数`lp->pfnProcess( lp );`；
 13. 每次循环事件，执行pfn函数，看是否需要退出循环，终止事件循环机制。`if (-1 == pfn( arg )) { break; }`。
 
-###1.6.数据结构图
+### 1.6.数据结构图
 epoll事件数据结构
-![Alt text](./1528202858448.png)
+![2-1.png](https://github.com/sysublackbear/libco_source_study/blob/master/libco_pic/2-1.png)
 
 stTimeout_t时间轮数据结构：
 ![Alt text](./1528202871982.png)
