@@ -264,14 +264,14 @@ int main(void)
 
 1. 首先程序进入到`main`函数，分配一段新的栈帧。这个时候会更新`%rbp`和`%rsp`两个寄存器的值。`%rbp`是基址指针寄存器，指向当前栈帧的底部位置。每次调用函数开始都会更新这个寄存器，代表开辟了一个新的栈帧。`%rsp`是栈指针寄存器，更改值，指向当前栈帧的顶部位置。如图：（进入main函数，但没有开始调用foo函数）
 **先补一张基础**：
-![Alt text](./1528533862683.png)
+![4-1.png](https://github.com/sysublackbear/libco_source_study/blob/master/libco_pic/4-1.png)
 2. 然后到了`foo(2, 5)`这一句话，`%rsi`会保存参数5，`%rdi`会保存参数2。函数调用过程的参数是从右到左放入寄存器，过多的参数会压栈。同时，`%rip`指令寄存器会，会存放下一个要执行的指令地址。如图所示：
-![Alt text](./1528534578849.png)
+![4-2.png](https://github.com/sysublackbear/libco_source_study/blob/master/libco_pic/4-2.png)
 3. 然后执行`callq`指令。`callq`只做两件事情：`push %rip`(a.把函数调用的下一个指令地址入栈，而这个地址就是函数的返回地址；b.把%rip指向新调用的函数的入口地址)**注意：将rip寄存器指向最新调用的函数入口地址，意味着函数开始调度执行！！！！**；
 4. 然后类似1，不过先把上一个栈帧的底部地址压到当前栈帧。`%rbp`和`%rsp`寄存器会更新，指向新的栈帧和栈顶。如图所示：
-![Alt text](./1529138748116.png)
+![4-3.png](https://github.com/sysublackbear/libco_source_study/blob/master/libco_pic/4-3.png)
 5. 函数执行完，先出栈，栈顶元素为上一个栈帧的rbp地址，恢复上一个栈帧环境到寄存器`%rbp`和`%rsp`。然后再遍历过所有的临时，局部变量和多余参数列表，最后再出栈原来的上一个调用函数的下一个执行(`return 0`)。达到恢复上一个栈的效果。
-![Alt text](./1528538601828.png)
+![4-4.png](https://github.com/sysublackbear/libco_source_study/blob/master/libco_pic/4-4.png)
 
 以下是一些附录资料：
 **gcc对寄存器的使用规则**
