@@ -1,7 +1,7 @@
-#libco(8)
+# libco(8)
 @(源码)
 
-##5.example_echocli.cpp
+## 5.example_echocli.cpp
 
 很明显可以看到，基于协程实现的echo服务器。代码如下：
 ```cpp
@@ -53,7 +53,7 @@ int main(int argc,char *argv[])
 /*./example_echosvr 127.0.0.1 10000 100 50*/
 ```
 
-###5.1.stEndPoint结构
+### 5.1.stEndPoint结构
 很简单，EndPoint=ip+port
 ```cpp
 struct stEndPoint
@@ -64,7 +64,7 @@ struct stEndPoint
 ```
 
 
-###5.2.sigaction介绍
+### 5.2.sigaction介绍
 sigaction函数可以读取和修改与指定信号相关联的处理动作。调用成功则返回0，出错则返回-1。signo是指定信号的编号。若act指针非空，则根据act修改该信号的处理动作。若oact指针非空，则通过oact传出该信号原来的处理动作。act和oact指向sigaction结构体。函数如下：
 ```cpp
 struct sigaction
@@ -81,7 +81,7 @@ struct sigaction
 
 上面的目的是为了忽略SIGPIPE信号。
 
-###5.3.关于SIGPIPE信号
+### 5.3.关于SIGPIPE信号
 这是从网上找回来的解答，可以看下，了解多一点。
 这里为什么Cli端要忽略掉SIGPIPE。是因为：SIGPIPE的默认信号处理程序会终止整个进程。这里目的是不希望cli进程被SIGPIPE杀死。所以这里选择忽略对该信号的处置。
 那么什么情况会产生SIGPIPE信号呢？如果一个 socket 在接收到了 RST packet （连接重置）之后，程序仍然向这个 socket 写入数据，那么就会产生SIGPIPE信号。
@@ -96,7 +96,7 @@ struct sigaction
 
 因此，对 server 来说，为了不被SIGPIPE信号杀死，那就需要忽略SIGPIPE信号。
 
-###5.4.readwrite_routine函数
+### 5.4.readwrite_routine函数
 代码如下：
 ```cpp
 // co_create( &co,NULL,readwrite_routine, &endpoint);
@@ -314,7 +314,7 @@ int co_poll_inner( stCoEpoll_t *ctx,struct pollfd fds[], nfds_t nfds, int timeou
 ```
 
 
-####5.4.1.socket函数（hook系统调用）
+#### 5.4.1.socket函数（hook系统调用）
 位于`co_hook_sys_call.cpp`，代码如下：
 ```cpp
 int socket(int domain, int type, int protocol)
@@ -352,7 +352,7 @@ int socket(int domain, int type, int protocol)
 }
 ```
 
-#####5.4.1.1.alloc_by_fd函数
+##### 5.4.1.1.alloc_by_fd函数
 位于`co_hook_sys_call.cpp`，代码如下：
 ```cpp
 struct rpchook_t
@@ -384,7 +384,7 @@ static rpchook_t *g_rpchook_socket_fd[ 102400 ] = { 0 };
 ```
 
 
-#####5.4.1.2.fcntl(hook系统调用)
+##### 5.4.1.2.fcntl(hook系统调用)
 位于`co_hook_sys_call.cpp`，代码如下：
 ```cpp
 int fcntl(int fildes, int cmd, ...)
@@ -492,7 +492,7 @@ int fcntl(int fildes, int cmd, ...)
 ```
 
 
-#####5.4.1.3.get_by_fd函数
+##### 5.4.1.3.get_by_fd函数
 位于`co_hook_sys_call.cpp`，代码如下：
 ```cpp
 struct rpchook_t
@@ -516,7 +516,7 @@ static inline rpchook_t * get_by_fd( int fd )
 ```
 
 
-####5.4.2.SetAddr函数
+#### 5.4.2.SetAddr函数
 位于`example_echocli.cpp`，代码如下：
 ```cpp
 static void SetAddr(const char *pszIP,const unsigned short shPort,struct sockaddr_in &addr)
@@ -543,7 +543,7 @@ static void SetAddr(const char *pszIP,const unsigned short shPort,struct sockadd
 }
 ```
 
-####5.4.3.connect函数（hook系统调用）
+#### 5.4.3.connect函数（hook系统调用）
 位于`co_hook_sys_call.cpp`，代码如下：
 ```cpp
 int connect(int fd, const struct sockaddr *address, socklen_t address_len)
@@ -624,7 +624,7 @@ int connect(int fd, const struct sockaddr *address, socklen_t address_len)
 }
 ```
 
-####5.4.4.AddFailCnt函数
+#### 5.4.4.AddFailCnt函数
 代码如下：
 ```cpp
 void AddFailCnt()
@@ -644,7 +644,7 @@ void AddFailCnt()
 }
 ```
 
-####5.4.5.write函数（hook系统调用）
+#### 5.4.5.write函数（hook系统调用）
 位于`co_hook_sys_call.cpp`，代码如下：
 ```cpp
 ssize_t write( int fd, const void *buf, size_t nbyte )
@@ -715,7 +715,7 @@ ssize_t write( int fd, const void *buf, size_t nbyte )
 5. 对于blocking的write有个特例：当write正阻塞等待时对面关闭了socket，则write则会立即将剩余缓冲区填满并返回所写的字节数，再次调用则write失败（connection reset by peer）。
 
 
-####5.4.6.read函数（hook系统调用）
+#### 5.4.6.read函数（hook系统调用）
 位于`co_hook_sys_call.cpp`，代码如下：
 ```cpp
 ssize_t read( int fd, void *buf, size_t nbyte )
@@ -755,5 +755,5 @@ ssize_t read( int fd, void *buf, size_t nbyte )
 }
 ```
 
-###5.5.综述
+### 5.5.综述
 可以看到，cli进程主要就是在开多个协程，每个协程维护一个fd的读写事件。先写成功再读，每次放"samorl"到svr端，非阻塞。
