@@ -1,5 +1,5 @@
   
-#libco(6)
+# libco(6)
 
 @(源码)
 
@@ -111,4 +111,4 @@ static short EpollEvent2Poll( uint32_t events )
 + 触发到Producer协程，回到`co_poll_inner`函数，回收所有想epoll注册的fds。然后返回死循环。然后再重新新建task，塞入到队列中，然后再调用`co_cond_signal`，接受信号，然后再调用`poll`函数阻塞1s。再重新挂起Producer协程，切回主协程，主协程继续陷入co_eventloop，如此循环。
 
 **如图所示：**
-![Alt text](./1529862684386.png)
+![6-1.png](https://github.com/sysublackbear/libco_source_study/blob/master/libco_pic/6-1.png)
