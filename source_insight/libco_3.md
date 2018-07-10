@@ -1,8 +1,8 @@
-#libco(3)
+# libco(3)
 @(源码)
 
 
-##2.example_closure.cpp
+## 2.example_closure.cpp
 有关闭包的例子，什么是闭包？简单理解就是：
 > 当匿名函数和non-local变量结合起来，就形成了闭包。
 
@@ -63,7 +63,7 @@ int main( int argc,char *argv[] )
 }
 ```
 
-###2.1.stCoClosure数据结构
+### 2.1.stCoClosure数据结构
 位于`co_closure.h`中，结构非常简单，只有一个纯虚函数`exec()`。
 ```cpp
 struct stCoClosure_t 
@@ -73,7 +73,7 @@ public:
 };
 ```
 
-###2.2.co_ref函数
+### 2.2.co_ref函数
 位于`co_closure.h`中，代码是一段宏：
 ```cpp
 // 调用：co_ref( ref,total,v2,m);
@@ -191,7 +191,7 @@ class type_ref
 ```
 定义了type_ref这样的一个类。
 
-###2.3.co_func函数
+### 2.3.co_func函数
 位于`co_closure.h`。代码如下：
 ```cpp
 //2.2 function
@@ -319,7 +319,7 @@ class f2: public stCoClosure_t
 
 ```
 
-###2.4.batch_exec函数
+### 2.4.batch_exec函数
 代码如下：
 ```cpp
 static void batch_exec( vector<stCoClosure_t*> &v )
