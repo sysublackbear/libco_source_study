@@ -1,7 +1,7 @@
-#libco(10)
+# libco(10)
 @(源码)
 
-##7.example_poll.cpp
+## 7.example_poll.cpp
 
 我们看下实现源码，初步看像是在几个连接的fd里面进行epoll操作：
 ```cpp
@@ -40,7 +40,7 @@ int main(int argc,char *argv[])
 }
 ```
 
-###7.1.poll_routine函数
+### 7.1.poll_routine函数
 位于`example_poll.cpp`中，代码如下：
 ```cpp
 // poll_routine(&v2);
@@ -117,7 +117,7 @@ static void *poll_routine( void *arg )
 }
 ```
 
-####7.1.1.CreateTcpSocket函数
+#### 7.1.1.CreateTcpSocket函数
 位于`example_poll.cpp`，代码如下：
 ```cpp
 // int fd = CreateTcpSocket();
