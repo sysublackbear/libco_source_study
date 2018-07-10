@@ -1,7 +1,7 @@
-#libco(9)
+# libco(9)
 @(源码)
 
-##6.example_echosvr.cpp
+## 6.example_echosvr.cpp
 
 看了5之后，我们看下6：基于协程实现的echo服务器（svr端），代码如下：
 ```cpp
@@ -81,7 +81,7 @@ struct task_t
 };
 ```
 
-###6.1.CreateTcpSocket函数
+### 6.1.CreateTcpSocket函数
 位于`example_echosvr.cpp`，代码如下：
 ```cpp
 // g_listen_fd = CreateTcpSocket( port,ip,true );
@@ -121,7 +121,7 @@ static int CreateTcpSocket(
 }
 ```
 
-####6.1.1.setsockopt函数（hook系统调用）
+#### 6.1.1.setsockopt函数（hook系统调用）
 位于`co_hook_syc_call.cpp`，代码如下：
 ```cpp
 // int nReuseAddr = 1;
@@ -168,11 +168,11 @@ int setsockopt(
 + `SO_REUSEADDR`用于对TCP套接字处于`TIME_WAIT`状态下的socket，才可以重复绑定使用。server程序总是应该在调用`bind()`之前设置`SO_REUSEADDR`套接字选项。TCP，先调用`close()`的一方会进入`TIME_WAIT`状态。
 
 
-####6.1.2.bind函数
+#### 6.1.2.bind函数
 `int ret = bind(fd,(struct sockaddr*)&addr,sizeof(addr));`
 没啥好说的，监听ip和port
 
-###6.2.SetNonBlock函数
+### 6.2.SetNonBlock函数
 位于`example_echosvr.cpp`，代码如下：
 ```cpp
 static int SetNonBlock(int iSock)
@@ -196,7 +196,7 @@ static int SetNonBlock(int iSock)
 `O_NDELAY`是在System V的早期版本中引入的，在编码时，还是推荐POSIX规定的`O_NONBLOCK`，`O_NONBLOCK`可以在open和fcntl时设置。
 
 
-###6.3.readwrite_routine函数
+### 6.3.readwrite_routine函数
 位于`example_echosvr.cpp`，代码如下：
 ```cpp
 static void *readwrite_routine( void *arg )
@@ -257,7 +257,7 @@ static void *readwrite_routine( void *arg )
 ```
 
 
-###6.4.accept_routine函数
+### 6.4.accept_routine函数
 位于`example_echosvr.cpp`，代码如下：
 ```cpp
 int co_accept(int fd, struct sockaddr *addr, socklen_t *len );
@@ -315,7 +315,7 @@ static void *accept_routine( void * )
 }
 ```
 
-####6.4.1.co_accept函数
+#### 6.4.1.co_accept函数
 位于`co_hook_sys_call.cpp`，代码如下：
 ```cpp
 // int fd = co_accept(g_listen_fd, (struct sockaddr *)&addr, &len);
@@ -336,7 +336,7 @@ int co_accept( int fd, struct sockaddr *addr, socklen_t *len )
 ```
 
 
-###6.5.在tcp和udp中，cli端和svr端的处理差异
+### 6.5.在tcp和udp中，cli端和svr端的处理差异
 **tcp连接模式：**
 cli端
 ```powershell
@@ -442,7 +442,7 @@ svn端：
 ```
 
 
-###6.6.综述
+### 6.6.综述
 echosvr端的处理过程比较简单，核心还是tcp协议服务器的处理规则：
 socket->bind->listen->accept->read/write
 主要有两类协程：
