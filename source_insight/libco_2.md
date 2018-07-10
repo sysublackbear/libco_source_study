@@ -377,10 +377,10 @@ epoll事件数据结构
 ![2-1.png](https://github.com/sysublackbear/libco_source_study/blob/master/libco_pic/2-1.png)
 
 stTimeout_t时间轮数据结构：
-![Alt text](./1528202871982.png)
+![2-2.png](https://github.com/sysublackbear/libco_source_study/blob/master/libco_pic/2-2.png)
 
 stTimeoutItemLink_t 和 stTimeoutItem_t 数据结构
-![Alt text](./1528202897741.png)
+![2-3.png](https://github.com/sysublackbear/libco_source_study/blob/master/libco_pic/2-3.png)
 
 有关定时器实现：
 https://blog.csdn.net/anonymalias/article/details/52022787
