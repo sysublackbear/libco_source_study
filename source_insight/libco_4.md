@@ -1,7 +1,7 @@
-#libco(4)
+# libco(4)
 @(源码)
 
-##3.example_cond.cpp
+## 3.example_cond.cpp
 
 这个例子的`main`函数比较简短：
 ```cpp
@@ -29,7 +29,7 @@ int main()
 }
 ```
 
-###3.1.stEnv_t数据结构
+### 3.1.stEnv_t数据结构
 位于`example_cond.cpp`，代码如下：
 ```cpp
 struct stEnv_t
@@ -78,7 +78,7 @@ struct stTimeoutItem_t
 };
 ```
 
-###3.2.co_cond_alloc函数
+### 3.2.co_cond_alloc函数
 位于`co_routine.cpp`，代码如下：
 ```cpp
 stCoCond_t *co_cond_alloc()
@@ -88,7 +88,7 @@ stCoCond_t *co_cond_alloc()
 ```
 调用calloc在堆中分配数据结构。
 
-###3.3.stCoRoutine_t数据结构
+### 3.3.stCoRoutine_t数据结构
 位于`co_routine_inner.h`，代码如下：
 ```cpp
 struct stCoRoutine_t
@@ -120,7 +120,7 @@ struct stCoRoutine_t
 };
 ```
 
-###3.4.co_create创建协程函数
+### 3.4.co_create创建协程函数
 位于`co_routine.cpp`，代码如下：
 ```cpp
 // 传入Consumer函数
@@ -144,7 +144,7 @@ int co_create(
 其中，`co_get_curr_thread_env`和`co_init_curr_thread_env`和`co_create_env`分别在1.2和1.3和1.3.1均有定义。
 
 
-###3.5.co_resume恢复协程函数
+### 3.5.co_resume恢复协程函数
 位于`co_routine.cpp`，代码如下：
 ```cpp
 // 挂起当前协程，让
@@ -170,7 +170,7 @@ void co_resume( stCoRoutine_t *co )
 }
 ```
 
-####3.5.1.coctx_make函数
+#### 3.5.1.coctx_make函数
 位于`coctx.cpp`，代码如下：
 ```cpp
 // 初始化coctx_t
@@ -247,7 +247,7 @@ struct coctx_t
 3. 一个进程被剖分为多个协程。然后可以在每个协程之间的切换。
 4. 每个协程拥有的东西，无非是自己的调用栈信息和各种上下文状态（当前寄存器信息）。这些信息保存在协程里面的`coctx_t`。
 
-#####3.5.2.一个简单函数调用的过程
+##### 3.5.2.一个简单函数调用的过程
 由于上面讲到的涉及协程切换，所以我们先得补一下函数调用的一些基础。看一下这个例子：
 ```cpp
 #include<stdio.h>
@@ -319,7 +319,7 @@ low  ---------->  |下一个栈帧     |
 ```
 函数局部变量总是通过%ebp减去偏移量来访问，而函数参数总是通过%ebp增加偏移量来访问。
 
-#####3.5.3.CoRoutineFunc函数
+##### 3.5.3.CoRoutineFunc函数
 位于`co_routine.cpp`，代码如下：
 ```cpp
 coctx_make( &co->ctx,(coctx_pfn_t)CoRoutineFunc,co,0 );
@@ -342,7 +342,7 @@ static int CoRoutineFunc( stCoRoutine_t *co,void * )
 ```
 没什么好讲的，逻辑比较简单。
 
-#####3.5.4.co_swap函数
+##### 3.5.4.co_swap函数
 位于`co_routine.cpp`，代码如下：
 ```cpp
 // co_swap( lpCurrRoutine, co );
@@ -412,7 +412,7 @@ void co_swap(stCoRoutine_t* curr, stCoRoutine_t* pending_co)
 }
 ```
 
-#####3.5.5.save_stack_buffer函数
+##### 3.5.5.save_stack_buffer函数
 位于`co_routine.cpp`，代码如下：
 ```cpp
 // save_stack_buffer(occupy_co);
@@ -440,7 +440,7 @@ void save_stack_buffer(stCoRoutine_t* occupy_co)
 }
 ```
 
-#####3.5.6.coctx_swap函数
+##### 3.5.6.coctx_swap函数
 位于`coctx.cpp`中，代码如下：
 ```cpp
 // coctx_swap(&(curr->ctx),&(pending_co->ctx) );
