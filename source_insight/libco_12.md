@@ -1,7 +1,7 @@
-#libco(12)
+# libco(12)
 @(源码)
 
-##9.example_specific.cpp
+## 9.example_specific.cpp
 
 这个例子篇幅还是比较小的，代码如下：
 ```cpp
@@ -22,7 +22,7 @@ int main()
 所以看所有的核心都在`RoutineFunc`里面了。
 
 
-###9.1.RoutineFunc函数
+### 9.1.RoutineFunc函数
 位于`example_specific.cpp`，代码如下：
 ```cpp
 CO_ROUTINE_SPECIFIC(stRoutineSpecificData_t, __routine);
@@ -44,7 +44,7 @@ void* RoutineFunc(void* args)
 }
 ```
 
-###9.2.CO_ROUTINE_SPECIFIC函数
+### 9.2.CO_ROUTINE_SPECIFIC函数
 这个宏比较复杂，位于`co_routine_specific.h`。
 ```cpp
 // CO_ROUTINE_SPECIFIC(stRoutineSpecificData_t, __routine);
@@ -149,7 +149,7 @@ struct stRoutineSpecificData_t
 ```
 
 
-###9.2.1.pthread_once_t：一次性初始化控制变量
+### 9.2.1.pthread_once_t：一次性初始化控制变量
 > 有时候我们需要对一些posix变量只进行一次初始化，如线程键（我下面会讲到）。如果我们进行多次初始化程序就会出现错误。
 > 在传统的顺序编程中，一次性初始化经常通过使用布尔变量来管理。控制变量被静态初始化为0，而任何依赖于初始化的代码都能测试该变量。如果变量值仍然为0，则它能实行初始化，然后将变量置为1。以后检查的代码将跳过初始化。
 > 但是在多线程程序设计中，事情就变的复杂的多。如果多个线程并发地执行初始化序列代码，可能有2个线程发现控制变量为0，并且都实行初始化，而该过程本该仅仅执行一次。
@@ -171,15 +171,15 @@ int pthread_once(pthread_once_t *once_control,void(*init_routine)(void));
 `pthread_once`函数首先检查控制变量，判断是否已经完成初始化，如果完成就简单地返回；否则，pthread_once调用初始化函数，并且记录下初始化被完成。如果在一个线程初始时，另外的线程调用`pthread_once`，则调用线程等待，直到那个现成完成初始话返回。
 
 
-###9.2.2.pthread_key_t介绍
+### 9.2.2.pthread_key_t介绍
 `pthread_key_t`无论是哪一个线程创建，其他所有的线程都是可见的，即一个进程中只需`phread_key_create()`一次。看似是全局变量，然而全局的只是key值，对于不同的线程对应的value值是不同的(通过`pthread_setspcific()`和`pthread_getspecific()`设置)。 
 
-###9.2.3.pthread_key_create介绍
+### 9.2.3.pthread_key_create介绍
 函数 `pthread_key_create()` 用来创建线程私有数据。该函数从 TSD 池中分配一项，将其地址值赋给 key 供以后访问使用。第 2 个参数是一个销毁函数，它是可选的，可以为 NULL，为 NULL 时，则系统调用默认的销毁函数进行相关的数据注销。如果不为空，则在线程退出时(调用 `pthread_exit()` 函数)时将以 key 锁关联的数据作为参数调用它，以释放分配的缓冲区，或是关闭文件流等。
 
 不论哪个线程调用了 `pthread_key_create()`，所创建的 key 都是所有线程可以访问的，但各个线程可以根据自己的需要往 key 中填入不同的值，相当于提供了一个同名而不同值的全局变量(这个全局变量相对于拥有这个变量的线程来说)。
 
-###9.2.4.co_getspecific函数
+### 9.2.4.co_getspecific函数
 位于`co_routine.cpp`，代码如下：
 ```cpp
 void *co_getspecific(pthread_key_t key)
@@ -198,7 +198,7 @@ void *co_getspecific(pthread_key_t key)
 
 `pthread_getspecific`函数：获取线程私有变量的函数
 
-###9.2.5.co_setspecific函数
+### 9.2.5.co_setspecific函数
 位于`co_routine.cpp`，代码如下：
 ```cpp
 int co_setspecific(pthread_key_t key, const void *value)
@@ -213,6 +213,6 @@ int co_setspecific(pthread_key_t key, const void *value)
 }
 ```
 
-###9.3.综述
+### 9.3.综述
 这个例子跟`example_setenv.cpp`类似，类似于写环境变量，这里写的线程/协程私有空间（TLS）。读起来还是比较通俗。输出结果如下：
-![Alt text](./1531073907309.png)
+![12-1.png](https://github.com/sysublackbear/libco_source_study/blob/master/libco_pic/12-1.png)
