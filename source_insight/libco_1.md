@@ -253,7 +253,7 @@ struct stStackMem_t
 ```
 `stCoRoutine_t`的介绍在1.2.3中。
 
-####1.2.6.stCoSpec_t的数据结构
+#### 1.2.6.stCoSpec_t的数据结构
 位于`co_routine_inner.h`中。如下：
 ```c++
 struct stCoSpec_t
@@ -377,7 +377,7 @@ struct stCoRoutineAttr_t
 其中，`__attribute__((packed))`的含义是：
 >`__attribute__` ((packed)) 的作用就是告诉编译器取消结构在编译过程中的优化对齐,按照实际占用字节数进行对齐，是GCC特有的语法。这个功能是跟操作系统没关系，跟编译器有关，gcc编译器不是紧凑模式的，我在windows下，用vc的编译器也不是紧凑的，用tc的编译器就是紧凑的。
 
-#####1.3.1.2.co_get_stackmem函数
+##### 1.3.1.2.co_get_stackmem函数
 位于`co_routine.cpp`中，如下：
 ```cpp
 static stStackMem_t* co_get_stackmem(
