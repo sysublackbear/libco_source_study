@@ -148,8 +148,11 @@ public:\
 #endif
 ```
 可以看到，这里相当于将函数参数的数据类型改了个别名形如：`typeof_a`，`typeof_b`，`typeof_c`，`typeof_d`，`typeof_e`。
+
 13. 定义类：`type_ref`；
+
 14. 类里面执行`repeat( comac_argc(__VA_ARGS__) ,impl_typeof,__VA_ARGS__ )\`。这里相当于循环执行：`#define impl_typeof( i,a,... ) typeof_##a & a;`；
+
 15. 然后在类中执行：
 ```cpp
 type_##name( \
