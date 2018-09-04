@@ -104,7 +104,7 @@ void inline AddTail(TLink*apLink,TNode *ap)
 {
 	// item的stTimeoutItemLink_t不为空,直接返回
 	// 证明该时间轮盘不属于该链表,已经放到某个链表下面了
-	// TODO:这里是考虑并发访问的情况？
+	// 结点的pLink已经有值，证明已经挂在某个链表下面了
 	if( ap->pLink )
 	{
 		return ;
@@ -136,8 +136,8 @@ static unsigned long long counter(void)
 	register uint32_t lo, hi;
 	register unsigned long long o;
 	__asm__ __volatile__ (
-			"rdtscp" : "=a"(lo), "=d"(hi)::"%rcx"
-			);
+		"rdtscp" : "=a"(lo), "=d"(hi)::"%rcx"
+	);
 	o = hi;
 	o <<= 32;
 	return (o | lo);
@@ -355,7 +355,7 @@ int AddTimeout(
 ```
 
 ### 1.5.co_eventloop函数综述
-这里函数主要用到了libco实现了时间轮盘的特点。轮盘上把一些网络io的事件挂上去。当发生对应网络事件的时候，切换到对应协程。或是当网络io事件超时的时候也切换到协程。事件的结构体有变量标记当前这个事件是超时了还是被触发了。TODO：后面这里会补上数据结构图。
+这里函数主要用到了libco实现了时间轮盘的特点。轮盘上把一些网络io的事件挂上去。当发生对应网络事件的时候，切换到对应协程。或是当网络io事件超时的时候也切换到协程。事件的结构体有变量标记当前这个事件是超时了还是被触发了。
 
 `co_eventloop`函数的步骤如下:
 1. 获取所有的事件列表；`co_epoll_res *result = ctx->result;`
@@ -370,7 +370,7 @@ int AddTimeout(
 10. 然后将超时引起的事件项加入到active列表中。相当于两部分事件列表：active（epoll触发的事件），timeout（时间轮盘统计超时的事件）；
 11. 遍历所有的active列表，把还没有超时的函数放到timeout列表（可能存在某些时间必须超时才能触发，不能提前触发），超时时间以`ullExpireTime`为准；
 12. 执行每个事件的回调函数`lp->pfnProcess( lp );`；
-13. 每次循环事件，执行pfn函数，看是否需要退出循环，终止事件循环机制。`if (-1 == pfn( arg )) { break; }`。
+13. 每次循环事件，执行pfn函数，看是否需要退出循环，终止事件循环机制。`if (-1 == pfn( arg )) { break; }`。pfn为epoll的结束回调函数。
 
 ### 1.6.数据结构图
 epoll事件数据结构
