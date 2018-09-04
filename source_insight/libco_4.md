@@ -412,6 +412,13 @@ void co_swap(stCoRoutine_t* curr, stCoRoutine_t* pending_co)
 }
 ```
 
+这里有一段关于共享栈模式的说明：
+
+> 因为 libco 实现的是 Stackful Coroutine ，这种协程的主要特点是每个协程都有独立的栈，所有的局部变量等信息都会保存在栈上。若所有协程都共享一个栈（或N个栈，N < 总协程数），那么如何保证在协程切换时 (context swap) ，能顺利恢复执行环境？
+> 答案就是 memcpy 。关键调用是 co_swap  。
+> 我们看到，co_swap 中，在切换前，先对当前正在执行的 Coroutine 执行 save_stack_buffer ，然后再真正调用 coctx_swap （汇编，Swap寄存器）。而在 coctx_swap 之后，此时 Coroutine 是被 co_resume 重新唤醒了，这时会把保存了的栈数据，重新 memcpy 到共享栈上 (copy-in)，再继续执行。那么 save_stack_buffer 是干啥的？
+> 很明显了，它通过计算 bp 到 sp 的距离，知道目前这个协程使用了的栈空间的大小，然后通过malloc分配一段这么大的空间，把栈上的内容全部复制进去（aka. Copy Stack, copy-out），栈上的内容也一样是储存在每个协程自己的结构 stCoroutine_t 上，因此每个协程依然有自己独立的栈空间。
+
 ##### 3.5.5.save_stack_buffer函数
 位于`co_routine.cpp`，代码如下：
 ```cpp
