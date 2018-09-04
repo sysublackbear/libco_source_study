@@ -76,7 +76,7 @@ struct stCoEpoll_t
     struct stTimeout_t *pTimeout;  // 时间轮，具体是什么待会看。
     struct stTimeoutItemLink_t *pstTimeoutList;  // 临时保存到期的定时器，不知道具体是什么
     struct stTimeoutItemLink_t *pstActiveList;  // 即将要发生的事件列表
-    co_epoll_res *result;  // TODO:这个数据结构具体也不知道是什么
+    co_epoll_res *result;  // 监听的事件列表结构
 };
 ```
 
@@ -117,7 +117,7 @@ struct stTimeoutItem_t
     // 事件触发或超时引起后所调用的回调函数
     OnProcessPfn_t pfnProcess;  // 注册一个函数,函数成员stTimeoutItem
     // 指向被挂起的协程,具体怎么回事待会看下
-    void *pArg; // routine 
+    void *pArg; // 协程函数参数
     bool bTimeout;  // 这个元素用来标记是否由于超时引起的
 };     
 typedef void (*OnPreparePfn_t)( stTimeoutItem_t *,struct epoll_event &ev, stTimeoutItemLink_t *active );
@@ -133,14 +133,14 @@ stCoRoutineEnv_t *co_get_curr_thread_env()
 }
 static stCoRoutineEnv_t* g_arrCoEnvPerThread[ 204800 ] = { 0 };
 ```
-g_arrCoEnvPerThread：全局的，记录每个线程含有的所有协程环境的数组空间，一个线程可以开204800个协程环境，每个线程通过自身的tid作为下标在进程空间的数组访问。
+g_arrCoEnvPerThread：全局的，记录每个线程含有的所有协程环境的数组空间，一个进程可以开204800个线程环境，每个线程通过自身的tid作为下标在进程空间的数组访问。
 
 #### 1.2.1.GetPid()
 不同linux的系统函数`getpid()`，这里考虑跨平台因素重新实现了`GetPid()`：
 ```cpp
 static pid_t GetPid()
 {
-	// 注意: pid,tid为static，static只会初始化一次，变量存放在堆中，再次重入该函数时，会略过该行。（static __thread为线程级别）                   
+    // 注意: pid,tid为static，static只会初始化一次，变量存放在堆中，再次重入该函数时，会略过该行。（static __thread为线程级别）  
     static __thread pid_t pid = 0;  // 线程局部存储(tls)
     static __thread pid_t tid = 0;  // __thread是GCC内置的线程局部存储设施，存取效率可以和全局变量相比。
     if( !pid || !tid || pid != getpid() )
@@ -202,7 +202,7 @@ struct stCoRoutine_t
     char cEnd;  // 协程结束运行标志
     char cIsMain;  // 主协程名称?TODO：后面补充
     char cEnableSysHook;  // 是否开启系统调用hook，TODO：后面补充
-    char cIsShareStack;
+    char cIsShareStack;  // 是否共享协程栈空间
              
     // 下面这些变量目前不清楚有什么用?TODO:后面补充
     void *pvEnv;
@@ -212,6 +212,7 @@ struct stCoRoutine_t
              
              
     //save satck buffer while confilct on same stack_buffer;
+    // 共享栈模式需要这些共享参数
     char* stack_sp; 
     unsigned int save_size;
     char* save_buffer;
@@ -277,8 +278,8 @@ void co_init_curr_thread_env()
 	struct stCoRoutine_t *self = co_create_env( env, NULL, NULL,NULL );  // 初始化协程(创造出协程)
 	self->cIsMain = 1;  // 是否为主协程
 
-	env->pending_co = NULL;  // TODO:这两个变量有什么作用
-	env->occupy_co = NULL;
+	env->pending_co = NULL;  // 将要运行的，等待中的协程
+	env->occupy_co = NULL;  // 运行中的，要被调度的协程
 
 	coctx_init( &self->ctx );  // 初始化协程上下文环境
 
@@ -303,6 +304,7 @@ struct stCoRoutine_t *co_create_env(
 	stCoRoutineAttr_t at;  // 栈的特征
 	if( attr )
 	{
+		// 分配协程栈大小
 		memcpy( &at,attr,sizeof(at) );  // 拷贝对象
 	}
 	if( at.stack_size <= 0 )
@@ -370,7 +372,7 @@ struct stCoRoutineAttr_t
 	stCoRoutineAttr_t()
 	{
 		stack_size = 128 * 1024;  // 默认128*1024
-		share_stack = NULL;
+		share_stack = NULL;  // 默认非共享栈模式
 	}
 }__attribute__ ((packed));
 ```
@@ -385,6 +387,7 @@ static stStackMem_t* co_get_stackmem(
 {
 	if (!share_stack)
 	{
+		// 非共享栈模式报错
 		return NULL;
 	}
 	int idx = share_stack->alloc_idx % share_stack->count;
@@ -515,7 +518,9 @@ void co_eventloop(
 		// 因为定时器的最小精度是1ms,所以最多等待1ms
 		int ret = co_epoll_wait( ctx->iEpollFd,result,stCoEpoll_t::_EPOLL_SIZE, 1 );
 
+		// 即将发生的事件列表
 		stTimeoutItemLink_t *active = (ctx->pstActiveList);
+		// 临时保存到期的事件列表
 		stTimeoutItemLink_t *timeout = (ctx->pstTimeoutList);
 
 		// 初始化timeout
@@ -555,7 +560,7 @@ void co_eventloop(
 		while( lp )
 		{
 			//printf("raise timeout %p\n",lp);
-			lp->bTimeout = true;
+			lp->bTimeout = true;  // 记录是由于超时触发引起的。
 			lp = lp->pNext;
 		}
 
