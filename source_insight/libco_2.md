@@ -370,7 +370,7 @@ int AddTimeout(
 10. 然后将超时引起的事件项加入到active列表中。相当于两部分事件列表：active（epoll触发的事件），timeout（时间轮盘统计超时的事件）；
 11. 遍历所有的active列表，把还没有超时的函数放到timeout列表（可能存在某些时间必须超时才能触发，不能提前触发），超时时间以`ullExpireTime`为准；
 12. 执行每个事件的回调函数`lp->pfnProcess( lp );`；
-13. 每次循环事件，执行pfn函数，看是否需要退出循环，终止事件循环机制。`if (-1 == pfn( arg )) { break; }`。pfn为epoll的结束回调函数。
+13. 每次循环事件，执行pfn函数，看是否需要退出循环，终止事件循环机制。`if (-1 == pfn( arg )) { break; }`。pfn为一次epoll的结束回调函数。
 
 ### 1.6.数据结构图
 epoll事件数据结构
